@@ -6,113 +6,102 @@ const CATEGORIES = [
     label: "GEOPOLITICS",
     icon: "⚡",
     color: "#ff4444",
-    prompt: `You are a geopolitical intelligence analyst. Search the web right now for the most important geopolitical news stories happening today involving the US, Russia, China, NATO, proxy wars, Ukraine, Middle East, Taiwan, and global military tensions.
+    prompt: `You are a geopolitical intelligence analyst. Based on your knowledge up to early 2026, provide the 5 most significant ongoing geopolitical situations involving the US, Russia, China, NATO, proxy wars, Ukraine, Middle East, and Taiwan.
 
-After searching, return ONLY a valid JSON array with exactly 5 objects. No markdown, no explanation, no extra text before or after. Each object must have these exact keys:
-- "headline": a short punchy news headline under 15 words
-- "summary": a 2-3 sentence explanation of what happened
-- "region": the geographic region or country pairing (e.g. "US-Russia", "Middle East")
-- "urgency": exactly one of "HIGH", "MEDIUM", or "LOW"
-- "source": name of the news outlet
+Return ONLY a valid JSON array with exactly 5 objects. No markdown, no explanation, no text before or after the JSON. Each object must have exactly these keys:
+"headline": short punchy title under 12 words
+"summary": 2-3 sentences explaining the situation
+"region": geographic region (e.g. "US-Russia", "Middle East")
+"urgency": one of exactly "HIGH", "MEDIUM", or "LOW"
+"source": write "Intelligence Brief"
 
-Example format:
-[{"headline":"Example headline here","summary":"This is what happened and why it matters.","region":"US-China","urgency":"HIGH","source":"Reuters"}]`
+Start your response with [ and end with ]`
   },
   {
     id: "business",
     label: "MARKETS & FINANCE",
     icon: "📊",
     color: "#f5a623",
-    prompt: `You are a financial markets analyst. Search the web right now for the most important business and financial news happening today — stock markets, Fed decisions, earnings, oil prices, crypto, major deals, and global trade developments.
+    prompt: `You are a financial analyst. Based on your knowledge up to early 2026, provide the 5 most significant ongoing financial and market developments — covering stock markets, Fed policy, major corporate moves, oil, crypto, and global trade.
 
-After searching, return ONLY a valid JSON array with exactly 5 objects. No markdown, no explanation, no extra text before or after. Each object must have these exact keys:
-- "headline": a short punchy news headline under 15 words
-- "summary": a 2-3 sentence explanation of what happened
-- "region": the market sector or geography (e.g. "Wall Street", "Oil Markets", "Crypto")
-- "urgency": exactly one of "HIGH", "MEDIUM", or "LOW"
-- "source": name of the news outlet
+Return ONLY a valid JSON array with exactly 5 objects. No markdown, no explanation, no text before or after the JSON. Each object must have exactly these keys:
+"headline": short punchy title under 12 words
+"summary": 2-3 sentences explaining the situation
+"region": market sector (e.g. "Wall Street", "Crypto", "Oil Markets")
+"urgency": one of exactly "HIGH", "MEDIUM", or "LOW"
+"source": write "Market Brief"
 
-Example format:
-[{"headline":"Example headline here","summary":"This is what happened and why it matters.","region":"Wall Street","urgency":"HIGH","source":"Bloomberg"}]`
+Start your response with [ and end with ]`
   },
   {
     id: "ai",
     label: "AI & TECH",
     icon: "🤖",
     color: "#00d4ff",
-    prompt: `You are a technology analyst. Search the web right now for the most important AI and technology news happening today — new AI models, big tech moves, regulation, major funding rounds, robotics, semiconductors, and breakthrough research.
+    prompt: `You are a technology analyst. Based on your knowledge up to early 2026, provide the 5 most significant ongoing AI and technology developments — covering AI models, big tech, regulation, semiconductors, and robotics.
 
-After searching, return ONLY a valid JSON array with exactly 5 objects. No markdown, no explanation, no extra text before or after. Each object must have these exact keys:
-- "headline": a short punchy news headline under 15 words
-- "summary": a 2-3 sentence explanation of what happened
-- "region": the company or sector (e.g. "OpenAI", "Semiconductors", "Big Tech")
-- "urgency": exactly one of "HIGH", "MEDIUM", or "LOW"
-- "source": name of the news outlet
+Return ONLY a valid JSON array with exactly 5 objects. No markdown, no explanation, no text before or after the JSON. Each object must have exactly these keys:
+"headline": short punchy title under 12 words
+"summary": 2-3 sentences explaining the situation
+"region": company or sector (e.g. "OpenAI", "Semiconductors")
+"urgency": one of exactly "HIGH", "MEDIUM", or "LOW"
+"source": write "Tech Brief"
 
-Example format:
-[{"headline":"Example headline here","summary":"This is what happened and why it matters.","region":"OpenAI","urgency":"HIGH","source":"TechCrunch"}]`
+Start your response with [ and end with ]`
   },
   {
     id: "macro",
     label: "MACRO ECONOMICS",
     icon: "🌐",
     color: "#7ed321",
-    prompt: `You are a macroeconomist. Search the web right now for the most important macroeconomic news happening today — inflation data, GDP reports, central bank policy, labor market, housing, commodity prices, emerging markets, debt levels, and how these sub-economies interconnect in the global macro picture.
+    prompt: `You are a macroeconomist. Based on your knowledge up to early 2026, provide the 5 most significant ongoing macroeconomic developments — covering inflation, central banks, GDP, labor markets, housing, commodities, and emerging markets.
 
-After searching, return ONLY a valid JSON array with exactly 5 objects. No markdown, no explanation, no extra text before or after. Each object must have these exact keys:
-- "headline": a short punchy news headline under 15 words
-- "summary": a 2-3 sentence explanation of what happened
-- "region": the economic sector or country (e.g. "US Economy", "Emerging Markets", "Commodities")
-- "urgency": exactly one of "HIGH", "MEDIUM", or "LOW"
-- "source": name of the news outlet
+Return ONLY a valid JSON array with exactly 5 objects. No markdown, no explanation, no text before or after the JSON. Each object must have exactly these keys:
+"headline": short punchy title under 12 words
+"summary": 2-3 sentences explaining the situation
+"region": economy or sector (e.g. "US Economy", "Emerging Markets")
+"urgency": one of exactly "HIGH", "MEDIUM", or "LOW"
+"source": write "Macro Brief"
 
-Example format:
-[{"headline":"Example headline here","summary":"This is what happened and why it matters.","region":"US Economy","urgency":"HIGH","source":"FT"}]`
+Start your response with [ and end with ]`
   }
 ];
 
 const URGENCY_COLORS = { HIGH: "#ff4444", MEDIUM: "#f5a623", LOW: "#7ed321" };
 
 async function fetchNewsForCategory(cat) {
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
+  const response = await fetch("/api/news", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 1000,
-      tools: [{ type: "web_search_20250305", name: "web_search" }],
-      messages: [{ role: "user", content: cat.prompt }]
-    })
+    body: JSON.stringify({ prompt: cat.prompt })
   });
 
   if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`API error ${response.status}: ${errText}`);
+    const text = await response.text();
+    throw new Error(`Server error ${response.status}: ${text}`);
   }
 
   const json = await response.json();
 
-  // Collect ALL text blocks (the final answer comes after tool use blocks)
+  if (json.error) throw new Error(json.error);
+
   const textBlocks = (json.content || [])
     .filter(b => b.type === "text" && b.text && b.text.trim().length > 0)
     .map(b => b.text);
 
-  // Try each text block looking for valid JSON array
-  for (const text of textBlocks.reverse()) {
+  for (const text of textBlocks) {
     try {
       const clean = text.replace(/```json|```/gi, "").trim();
       const start = clean.indexOf("[");
       const end = clean.lastIndexOf("]") + 1;
       if (start !== -1 && end > start) {
         const parsed = JSON.parse(clean.slice(start, end));
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
-        }
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
     } catch (_) {}
   }
 
-  throw new Error("Could not parse news data from response.");
+  throw new Error("Could not parse response. Try again.");
 }
 
 function NewsCard({ item, accentColor }) {
@@ -124,19 +113,11 @@ function NewsCard({ item, accentColor }) {
         background: "rgba(255,255,255,0.03)",
         border: "1px solid rgba(255,255,255,0.07)",
         borderLeft: `3px solid ${URGENCY_COLORS[item.urgency] || accentColor}`,
-        borderRadius: "2px",
-        padding: "16px 18px",
-        cursor: "pointer",
-        transition: "all 0.2s ease"
+        borderRadius: "2px", padding: "16px 18px",
+        cursor: "pointer", transition: "all 0.2s ease"
       }}
-      onMouseEnter={e => {
-        e.currentTarget.style.background = "rgba(255,255,255,0.06)";
-        e.currentTarget.style.borderLeftColor = accentColor;
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.background = "rgba(255,255,255,0.03)";
-        e.currentTarget.style.borderLeftColor = URGENCY_COLORS[item.urgency] || accentColor;
-      }}
+      onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.06)"; }}
+      onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.03)"; }}
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 8 }}>
         <div style={{ fontFamily: "'Courier New', monospace", fontSize: 13, fontWeight: 700, color: "#e8e8e8", lineHeight: 1.4, flex: 1 }}>
@@ -162,10 +143,8 @@ function NewsCard({ item, accentColor }) {
       </div>
       {expanded && (
         <div style={{
-          fontSize: 12, color: "#aaa", lineHeight: 1.7,
-          fontFamily: "Georgia, serif",
-          borderTop: "1px solid rgba(255,255,255,0.06)",
-          paddingTop: 10, marginTop: 4
+          fontSize: 12, color: "#aaa", lineHeight: 1.7, fontFamily: "Georgia, serif",
+          borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 10, marginTop: 4
         }}>
           {item.summary}
         </div>
@@ -177,7 +156,6 @@ function NewsCard({ item, accentColor }) {
 function CategoryPanel({ cat, items, isLoading, error, lastUpdated, onFetch }) {
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
-      {/* Panel header */}
       <div style={{
         display: "flex", justifyContent: "space-between", alignItems: "center",
         padding: "14px 0", borderBottom: `1px solid ${cat.color}33`, marginBottom: 16
@@ -200,9 +178,8 @@ function CategoryPanel({ cat, items, isLoading, error, lastUpdated, onFetch }) {
             border: `1px solid ${isLoading ? "#333" : cat.color}`,
             color: isLoading ? "#444" : cat.color,
             fontFamily: "'Courier New', monospace",
-            fontSize: 10, fontWeight: 700,
-            padding: "6px 14px", borderRadius: 2,
-            cursor: isLoading ? "not-allowed" : "pointer",
+            fontSize: 10, fontWeight: 700, padding: "6px 14px",
+            borderRadius: 2, cursor: isLoading ? "not-allowed" : "pointer",
             letterSpacing: 2, transition: "all 0.2s"
           }}
         >
@@ -210,7 +187,6 @@ function CategoryPanel({ cat, items, isLoading, error, lastUpdated, onFetch }) {
         </button>
       </div>
 
-      {/* Loading skeletons */}
       {isLoading && (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {[...Array(5)].map((_, i) => (
@@ -222,12 +198,11 @@ function CategoryPanel({ cat, items, isLoading, error, lastUpdated, onFetch }) {
             }} />
           ))}
           <div style={{ textAlign: "center", fontSize: 10, color: "#333", fontFamily: "'Courier New', monospace", marginTop: 8, letterSpacing: 2 }}>
-            SEARCHING LIVE SOURCES...
+            LOADING INTELLIGENCE BRIEF...
           </div>
         </div>
       )}
 
-      {/* Error state */}
       {error && !isLoading && (
         <div style={{
           background: "#ff444410", border: "1px solid #ff444430",
@@ -239,37 +214,28 @@ function CategoryPanel({ cat, items, isLoading, error, lastUpdated, onFetch }) {
           <div style={{ fontSize: 10, color: "#666", fontFamily: "'Courier New', monospace", marginBottom: 16 }}>
             {error}
           </div>
-          <button
-            onClick={() => onFetch(cat)}
-            style={{
-              background: "#ff444418", border: "1px solid #ff4444",
-              color: "#ff4444", fontFamily: "'Courier New', monospace",
-              fontSize: 10, fontWeight: 700, padding: "6px 16px",
-              borderRadius: 2, cursor: "pointer", letterSpacing: 2
-            }}
-          >
-            RETRY
-          </button>
+          <button onClick={() => onFetch(cat)} style={{
+            background: "#ff444418", border: "1px solid #ff4444",
+            color: "#ff4444", fontFamily: "'Courier New', monospace",
+            fontSize: 10, fontWeight: 700, padding: "6px 16px",
+            borderRadius: 2, cursor: "pointer", letterSpacing: 2
+          }}>RETRY</button>
         </div>
       )}
 
-      {/* Empty state */}
       {!isLoading && !error && !items && (
         <div style={{ textAlign: "center", padding: "60px 20px" }}>
           <div style={{ fontSize: 36, marginBottom: 16, opacity: 0.2 }}>{cat.icon}</div>
           <div style={{ fontSize: 11, color: "#333", fontFamily: "'Courier New', monospace", letterSpacing: 3 }}>AWAITING INTEL</div>
           <div style={{ fontSize: 10, color: "#2a2a2a", fontFamily: "'Courier New', monospace", marginTop: 8, letterSpacing: 2 }}>
-            PRESS REFRESH TO FETCH LIVE NEWS
+            PRESS REFRESH TO LOAD BRIEF
           </div>
         </div>
       )}
 
-      {/* News cards */}
       {!isLoading && items && (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {items.map((item, i) => (
-            <NewsCard key={i} item={item} accentColor={cat.color} />
-          ))}
+          {items.map((item, i) => <NewsCard key={i} item={item} accentColor={cat.color} />)}
         </div>
       )}
     </div>
@@ -291,8 +257,7 @@ export default function NewsDashboard() {
       setNewsData(prev => ({ ...prev, [cat.id]: items }));
       setLastUpdated(prev => ({ ...prev, [cat.id]: new Date() }));
     } catch (e) {
-      console.error(e);
-      setErrors(prev => ({ ...prev, [cat.id]: e.message || "Unknown error. Try refreshing." }));
+      setErrors(prev => ({ ...prev, [cat.id]: e.message || "Unknown error." }));
     } finally {
       setLoading(prev => ({ ...prev, [cat.id]: false }));
     }
@@ -302,26 +267,17 @@ export default function NewsDashboard() {
 
   const handleTabChange = (cat) => {
     setActiveTab(cat.id);
-    if (!newsData[cat.id] && !loading[cat.id]) {
-      fetchCategory(cat);
-    }
+    if (!newsData[cat.id] && !loading[cat.id]) fetchCategory(cat);
   };
 
-  // Auto-fetch first tab on mount
-  useEffect(() => {
-    fetchCategory(CATEGORIES[0]);
-  }, []);
+  useEffect(() => { fetchCategory(CATEGORIES[0]); }, []);
 
   const now = new Date();
 
   return (
     <div style={{
-      minHeight: "100vh",
-      background: "#080808",
-      backgroundImage: `
-        radial-gradient(ellipse at 20% 0%, rgba(255,68,68,0.04) 0%, transparent 60%),
-        radial-gradient(ellipse at 80% 100%, rgba(0,212,255,0.03) 0%, transparent 60%)
-      `,
+      minHeight: "100vh", background: "#080808",
+      backgroundImage: `radial-gradient(ellipse at 20% 0%, rgba(255,68,68,0.04) 0%, transparent 60%), radial-gradient(ellipse at 80% 100%, rgba(0,212,255,0.03) 0%, transparent 60%)`,
       color: "#e0e0e0"
     }}>
       <style>{`
@@ -332,13 +288,10 @@ export default function NewsDashboard() {
         ::-webkit-scrollbar-thumb{background:#333;border-radius:2px}
       `}</style>
 
-      {/* Header */}
       <div style={{
-        borderBottom: "1px solid rgba(255,255,255,0.06)",
-        padding: "20px 32px",
+        borderBottom: "1px solid rgba(255,255,255,0.06)", padding: "20px 32px",
         display: "flex", justifyContent: "space-between", alignItems: "center",
-        background: "rgba(0,0,0,0.7)",
-        backdropFilter: "blur(20px)",
+        background: "rgba(0,0,0,0.7)", backdropFilter: "blur(20px)",
         position: "sticky", top: 0, zIndex: 100
       }}>
         <div>
@@ -359,57 +312,37 @@ export default function NewsDashboard() {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div style={{
-        display: "flex",
-        borderBottom: "1px solid rgba(255,255,255,0.06)",
-        background: "rgba(0,0,0,0.4)",
-        overflowX: "auto"
-      }}>
+      <div style={{ display: "flex", borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(0,0,0,0.4)", overflowX: "auto" }}>
         {CATEGORIES.map(cat => (
-          <button
-            key={cat.id}
-            onClick={() => handleTabChange(cat)}
-            style={{
-              padding: "14px 22px",
-              background: activeTab === cat.id ? `${cat.color}10` : "transparent",
-              border: "none",
-              borderBottom: activeTab === cat.id ? `2px solid ${cat.color}` : "2px solid transparent",
-              color: activeTab === cat.id ? cat.color : "#444",
-              fontFamily: "'Courier New', monospace",
-              fontSize: 10, fontWeight: 700, letterSpacing: 2,
-              cursor: "pointer", transition: "all 0.2s",
-              whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 6
-            }}
-          >
+          <button key={cat.id} onClick={() => handleTabChange(cat)} style={{
+            padding: "14px 22px", background: activeTab === cat.id ? `${cat.color}10` : "transparent",
+            border: "none", borderBottom: activeTab === cat.id ? `2px solid ${cat.color}` : "2px solid transparent",
+            color: activeTab === cat.id ? cat.color : "#444",
+            fontFamily: "'Courier New', monospace", fontSize: 10, fontWeight: 700,
+            letterSpacing: 2, cursor: "pointer", transition: "all 0.2s",
+            whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 6
+          }}>
             {cat.icon} {cat.label}
             {loading[cat.id] && <span style={{ animation: "blink 0.8s infinite", color: cat.color }}>●</span>}
           </button>
         ))}
       </div>
 
-      {/* Content */}
       <div style={{ maxWidth: 880, margin: "0 auto", padding: "28px 24px" }}>
         <CategoryPanel
-          cat={activeCat}
-          items={newsData[activeCat.id]}
-          isLoading={loading[activeCat.id]}
-          error={errors[activeCat.id]}
-          lastUpdated={lastUpdated[activeCat.id]}
-          onFetch={fetchCategory}
+          cat={activeCat} items={newsData[activeCat.id]}
+          isLoading={loading[activeCat.id]} error={errors[activeCat.id]}
+          lastUpdated={lastUpdated[activeCat.id]} onFetch={fetchCategory}
         />
       </div>
 
-      {/* Footer */}
       <div style={{
-        borderTop: "1px solid rgba(255,255,255,0.04)",
-        padding: "16px 32px",
+        borderTop: "1px solid rgba(255,255,255,0.04)", padding: "16px 32px",
         display: "flex", justifyContent: "space-between",
-        fontFamily: "'Courier New', monospace",
-        fontSize: 9, color: "#222", letterSpacing: 2
+        fontFamily: "'Courier New', monospace", fontSize: 9, color: "#222", letterSpacing: 2
       }}>
         <span>MIND MONEY LLC © 2026</span>
-        <span>POWERED BY CLAUDE AI + LIVE WEB SEARCH</span>
+        <span>POWERED BY CLAUDE AI</span>
         <span>CLICK ANY CARD TO EXPAND</span>
       </div>
     </div>
